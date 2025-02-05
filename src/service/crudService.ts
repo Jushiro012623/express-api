@@ -1,7 +1,7 @@
 import {NextFunction, Response, Request} from 'express'
-import statusCodes from '../constants'
+import HTTP_STATUS from '../constants'
 import catchAsync from '../utils/catchAsync'
-
+import { AppError } from '../utils/appError'
 export default class CrudService {
     private model
     private modelLabel
@@ -9,15 +9,17 @@ export default class CrudService {
         this.model = Model
         this.modelLabel = modelLabel
     }
+    private notFound(next : NextFunction) { 
+        return next( new AppError(`No ${this.modelLabel} Found`, HTTP_STATUS.NOT_FOUND) )
+    }
+
     public deleteOne = catchAsync(async (req : Request, res : Response, next : NextFunction) => {
         const id = req.params.id
+
         const result = await this.model.destroy({ where: { id } })
-    
-        if (!result) {
-            res.status(statusCodes.NOT_FOUND)
-            return next(new Error(`No ${this.modelLabel} Found`))
-        }
-        res.status(statusCodes.NO_CONTENT).json({
+        if (!result) return this.notFound(next)
+
+        res.status(HTTP_STATUS.NO_CONTENT).json({
             success: true,
             message: `${this.modelLabel} deleted sucessfully`,
             data: null
@@ -25,48 +27,51 @@ export default class CrudService {
     });
     public updateOne = catchAsync(async (req : Request, res : Response, next : NextFunction)  => {
         const id = req.params.id
+        
         const result = await this.model.update(req.body,{ where: { id } });
-        if (!result) {
-            res.status(statusCodes.NOT_FOUND)
-            return next(new Error(`No ${this.modelLabel} Found`))
-        }
+        if (!result) return this.notFound(next)
+
         const updatedResult = await this.model.findByPk(id)
-        res.status(statusCodes.OK).json({
+        res.status(HTTP_STATUS.OK).json({
             success: true,
             message: `${this.modelLabel} updated  sucessfully`,
             data: updatedResult,
         });
     });
+
     public createOne = catchAsync(async (req : Request, res : Response, next : NextFunction)  => {
+
         const result = await this.model.create({...req.body,});
-            res.status(statusCodes.CREATED).json({
+            res.status(HTTP_STATUS.CREATED).json({
             success: true,
-            data: result,
             message: `${this.modelLabel} created sucessfully`,
+            data: result,
         })
     });
+
     public getOne = catchAsync(async (req : Request, res : Response, next : NextFunction)  => {
-        const result = await this.model.findByPk(req.params.id);
-        if (!result) {
-            res.status(statusCodes.NOT_FOUND)
-            return next(new Error(`No ${this.modelLabel} Found`))
-        }
-        res.status(statusCodes.OK).json({
+        const id = req.params.id
+
+        const result = await this.model.findByPk(id);
+        if (!result) return this.notFound(next)
+
+        res.status(HTTP_STATUS.OK).json({
             success: true,
-            data: result,
             message: `${this.modelLabel} retrieved sucessfully`,
+            data: result,
         });
     });
     public getAll = catchAsync(async (req : Request, res : Response, next : NextFunction)  => {
+
         const result = await this.model.findAll({
             attributes : {
                 exclude: ['createdAt', 'updatedAt', 'password']
             }
         });
-        res.status(statusCodes.OK).json({
+        res.status(HTTP_STATUS.OK).json({
             success: true,
-            data: result,
             message: `${this.modelLabel}s retrieved sucessfully`,
+            data: result,
         });
     });
     

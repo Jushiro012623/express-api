@@ -10,7 +10,7 @@ import moment from 'moment'
 import nodemailer from "../../lib/nodemailer";
 import verifyRequest from "../../helpers/verifyRequest";
 
-const login = async (req: Request , res: Response, next: NextFunction) : Promise<void> => {
+export const login = async (req: Request , res: Response, next: NextFunction) : Promise<void> => {
     verifyRequest(req, res)
     const { email, password, login_type } = req.body;
 
@@ -37,7 +37,7 @@ const login = async (req: Request , res: Response, next: NextFunction) : Promise
         },
     })
 }
-const register = async (req: Request , res: Response, next: NextFunction) : Promise<void> => {
+export const register = async (req: Request , res: Response, next: NextFunction) : Promise<void> => {
     verifyRequest(req, res)
     const { username, password, email } = req.body
 
@@ -58,13 +58,13 @@ const register = async (req: Request , res: Response, next: NextFunction) : Prom
         },
     })
 }
-const logout = async (req: Request , res: Response, next: NextFunction) : Promise<void> => {
+export const logout = async (req: Request , res: Response, next: NextFunction) : Promise<void> => {
     res.status(HTTP_STATUS.OK).json({
         message: 'Logout successfully',
         success: true,
     })
 }
-const forgotPassword = async (req: Request , res: Response, next: NextFunction) : Promise<void> => {
+export const forgotPassword = async (req: Request , res: Response, next: NextFunction) : Promise<void> => {
     verifyRequest(req, res)
     const { email } = req.body
 
@@ -89,7 +89,7 @@ const forgotPassword = async (req: Request , res: Response, next: NextFunction) 
         reset_token : resetToken
     })
 }
-const resetPasswordToken = async (req: Request , res: Response, next: NextFunction) : Promise<void> => {
+export const resetPasswordToken = async (req: Request , res: Response, next: NextFunction) : Promise<void> => {
     verifyRequest(req, res)
     const { token } = req.params;
     const resetToken = await AuthService.findResetToken(token);
@@ -102,7 +102,7 @@ const resetPasswordToken = async (req: Request , res: Response, next: NextFuncti
         </form>
     `);
 }
-const resetPassword = async (req: Request , res: Response, next: NextFunction) : Promise<void> => {
+export const resetPassword = async (req: Request , res: Response, next: NextFunction) : Promise<void> => {
     verifyRequest(req, res)
     const { token, password } = req.body;
 

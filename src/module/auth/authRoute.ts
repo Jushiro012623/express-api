@@ -1,5 +1,5 @@
 import { Router } from "express";
-import authUser from "./authController";
+import {login, register, logout, forgotPassword, resetPassword, resetPasswordToken} from "./authController";
 import catchAsync from "../../utils/catchAsync";
 import { loginValidation, registerValidation, emailValidation, resetPasswordValidation } from "./authValidation";
 import { requireAuthUser, requireGuestUser } from "../../middlewares/authMiddleware";
@@ -9,30 +9,30 @@ const route = Router();
 route.post('/login', 
     requireGuestUser, 
     loginValidation, 
-    catchAsync(authUser.login)
+    catchAsync(login)
 );
 route.post('/register', 
     requireGuestUser,
     registerValidation, 
-    catchAsync(authUser.register)
+    catchAsync(register)
 );
 route.post('/logout', 
     requireAuthUser, 
-    catchAsync(authUser.logout)
+    catchAsync(logout)
 );
 route.post('/forgot-password', 
     requireGuestUser, 
     emailValidation, 
-    catchAsync(authUser.forgotPassword)
+    catchAsync(forgotPassword)
 );
 route.get('/reset-password/:token', 
     requireGuestUser, 
-    catchAsync(authUser.resetPasswordToken)
+    catchAsync(resetPasswordToken)
 );
 route.post('/reset-password', 
     requireGuestUser, 
     resetPasswordValidation,
-    catchAsync(authUser.resetPassword)
+    catchAsync(resetPassword)
 );
 
-export {route as AuthRoute}
+export {route as AuthRoutes}
