@@ -9,12 +9,13 @@ import crypto from 'crypto'
 import moment from 'moment'
 import nodemailer from "../../lib/nodemailer";
 import verifyRequest from "../../helpers/verifyRequest";
-
+import { Op } from "sequelize";
 export const login = async (req: Request , res: Response, next: NextFunction) : Promise<void> => {
     verifyRequest(req, res)
     const { email, password, login_type } = req.body;
 
-    const user = await AuthService.findUser({email})
+    const usernameEmailQuery = { [Op.or]:[{ username: email }, { email : email }]}
+    const user = await AuthService.findUser(usernameEmailQuery)
     if(!user) return next(new AppError('User not found', HTTP_STATUS.NOT_FOUND));
 
     const isPasswordMatches = await compare(password, user.password)
@@ -41,11 +42,21 @@ export const register = async (req: Request , res: Response, next: NextFunction)
     verifyRequest(req, res)
     const { username, password, email } = req.body
 
-    const isUserExist = await AuthService.findUser({email})
-    if(isUserExist) return next(new AppError('Email already exists', HTTP_STATUS.CONFLICT));
-
+    const usernameEmailQuery = { [Op.or]: [ { email }, { username }] }
+    const isUserExist = await AuthService.findUser(usernameEmailQuery)
+    
+    if(isUserExist) {
+        if(isUserExist.username === username){
+            return next(new AppError('Username already exists', HTTP_STATUS.CONFLICT));
+        }
+        if(isUserExist.email === email){
+            return next(new AppError('Email already exists', HTTP_STATUS.CONFLICT));
+        }
+    }
     const hashPassword = await hash(password)
     const user = await AuthService.createUser({email, password : hashPassword , username})
+    
+    // TODO create static ROLE FOR REGULAR USER
 
     res.status(HTTP_STATUS.CREATED).json({
         message: 'User registered successfully',

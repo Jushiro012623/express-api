@@ -28,7 +28,7 @@ User.init({
         unique: true,
     },
 }, {
-    sequelize: database.sequelize(), // Use the existing database connection
+    sequelize: database.sequelize(),
     modelName: 'User',
 });
 

@@ -1,8 +1,6 @@
 import { body, query } from 'express-validator'
 
 export const emailValidation = body('email')
-    .isEmail()
-    .withMessage('Email is invalid')
     .notEmpty()
     .withMessage('Email is required')
 
